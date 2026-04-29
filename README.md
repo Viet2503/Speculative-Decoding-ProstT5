@@ -24,7 +24,7 @@ The core process rely on the specific behavior of the Transformer model that all
 ## How to use
 
 ### 0. Installation
-This project requires Python 3.7 or later and the following dependencies:
+This project requires conda and Python 3.7 or later and the following dependencies:
 
 ```
 conda create -n "speculative-decoding" python=3.12.13
