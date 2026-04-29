@@ -27,14 +27,9 @@ The core process rely on the specific behavior of the Transformer model that all
 This project requires Python 3.7 or later and the following dependencies:
 
 ```
-rich
-tqdm
-termcolor
-tokenizers>=0.19.1
-torch>=2.3.0
-transformers>=4.41.1
-accelerate>=0.30.1
-bitsandbytes>=0.43.1
+conda create -n "speculative-decoding" python=3.12.13
+conda activate speculative-decoding
+pip install -r requirements.txt
 ```
 
 Simply fork this repository and install the dependencies.
