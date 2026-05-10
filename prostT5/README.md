@@ -4,6 +4,7 @@
 
 1. **Pinned the env** to `transformers==4.46.3` + `protobuf>=3.20,<5` + `sentencepiece` (transformers 5.x has a regression that breaks `T5Tokenizer` loading from `spiece.model`, and ProstT5 ships only `spiece.model`).
 2. **Loaded the slow `T5Tokenizer`** via `T5Tokenizer.from_pretrained('Rostlab/ProstT5_fp16', do_lower_case=False, legacy=True)` — the fast variant doesn't work because ProstT5's tokenizer is BPE, not Unigram.
+3. **Google Drive caching**: HuggingFace model cache (`HF_HOME`) is redirected to Google Drive to avoid re-downloading ProstT5 (~5.64 GB) on Colab reconnects. Checkpoints also persist to Drive.
 
 ## Models
 
@@ -13,7 +14,12 @@
 
 ## Test Sets
 
-1. **Built the length-stratified test set** of 5 AlphaFoldDB proteins covering ~1 order of magnitude in length: **P01308 (110), A0A6G0XC32 (163), P04637 (393), P0DTC9 (419), P00533 (1 210)**.
+1. **Built a 100-protein test set** (see `test_set_100.py`) stratified across:
+   - **Length**: 20 proteins per bin (tiny 50-100, short 101-250, medium 251-500, long 501-1000, very long 1001-2500)
+   - **Secondary structure**: all-alpha, all-beta, alpha/beta, coil-rich/disordered
+   - **Organism**: human, model organisms, bacteria, archaea/other
+   - **MSA depth**: deep, moderate, shallow (for future Profile HMM drafter compatibility)
+   - **Other factors**: disease association, fold complexity, function, AA composition bias
 2. **Resolved each PDB URL via the AFDB API** (`/api/prediction/{uid} → pdbUrl`) instead of hard-coding `model_v4.pdb` (AFDB has moved to `model_v6`; this also future-proofs against further bumps).
 3. **Auto-installed Foldseek** for the runtime's OS (`foldseek-osx-universal` on Mac, `foldseek-linux-avx2` on Colab) into `prostT5/foldseek_bin/bin/`, made it executable.
 4. **Extracted AA + 3Di per protein** by running `foldseek createdb` + `convert2fasta` on each downloaded PDB, then cached the result as `benchmark_data/test_set_AA.fasta` and `benchmark_data/test_set_3Di.fasta`.
@@ -23,6 +29,7 @@
     - `@torch.inference_mode()` + `model.eval()`, no autograd,
     - `torch.cuda.synchronize()` around every timed region,
     - `torch.cuda.reset_peak_memory_stats()` per protein → clean per-protein peak vRAM.
+6. **Checkpointing**: state saved after every protein (survives Colab disconnects via Google Drive).
 
 ## Benchmarks
 
@@ -35,13 +42,42 @@
 
 ---
 
-## Future TODO — proper agreement / acceptance-rate (α) measurement
+## Agreement & Acceptance Rate (α) Measurement
 
-The pilot enc-dec ↔ enc-CNN per-residue identity number (~26%) we computed today is **not presentation-ready**. It needs to be redone in the drafter-integration phase (weeks 5–7) because:
+### Greedy Agreement Metrics
+- **Per-residue identity**: fraction of positions where enc-dec and enc-CNN argmax outputs match
+- **Per-AA class metrics**: precision, recall, F1 for each of 20 amino acid types
+- **Confusion matrix**: 20x20 (rows = enc-dec reference, cols = CNN prediction)
+- **Positional analysis**: agreement binned by normalized position (N-term to C-term, 10 bins)
 
-1. It compares two argmax outputs under greedy; real α uses the verifier's full distribution via the speculative-sampling rule `min(1, p(y)/q(y))`, not just argmax identity.
-2. The enc-CNN drafter is prefix-independent, so it doesn't reflect how a re-queriable drafter would behave inside an actual spec-decoding loop.
-3. Sequence recovery against AFDB AA is also artificially low under greedy; ProstT5's published recovery uses sampling (`top_p=0.85, top_k=3, T=1.0, best-of-10`).
-4. There's a 1-residue length mismatch on the longest protein (L=1 210 vs. 1 211 in the agreement table) — minor `<fold2AA>` / EOS slicing edge case to fix.
+### Sampling-Based Acceptance Rate α
+Proper α computed via Leviathan's speculative-sampling rule:
 
-**What proper α-measurement looks like:** sweep enc-dec under greedy *and* sampling, compute α two ways (greedy-identity α, and Leviathan-rule sampling α), plug into Theorem 3.8 to predict wall-clock speedup at γ ∈ {3, 5, 8, 16}, then compare to **measured** speedup once the enc-CNN is wired into HuggingFace's `assistant_model` API.
+```
+α_t = Σ_v min(p_t(v), q_t(v))
+```
+
+Where:
+- `p_t` = enc-dec (verifier) distribution at position t, obtained via teacher-forced forward pass
+- `q_t` = enc-CNN (drafter) distribution at position t (prefix-independent, single parallel pass)
+
+Swept across 4 sampling configurations:
+1. **Greedy** (T=1.0, no filtering) — baseline
+2. **ProstT5 published** (T=1.0, top_k=3, top_p=0.85)
+3. **Conservative** (T=0.5) — sharper distributions
+4. **Exploratory** (T=1.5) — flatter distributions
+
+Results are plugged into Theorem 3.8 to predict wall-clock speedup at draft lengths γ ∈ {3, 5, 8, 16}.
+
+### Fixed Issues
+- Length mismatch bug on long proteins (enc-dec output now truncated to expected length L)
+
+---
+
+## Future TODO — Integration Phase
+
+**What remains for the drafter-integration phase (weeks 5–7):**
+1. Wire the enc-CNN into HuggingFace's `assistant_model` API for actual speculative decoding
+2. Compare **predicted** speedup (from α + Theorem 3.8) to **measured** speedup
+3. Address that enc-CNN is prefix-independent — measure how this affects real acceptance in a spec-decoding loop
+4. Evaluate Profile HMM drafter as an alternative (test set already designed for MSA depth diversity)
