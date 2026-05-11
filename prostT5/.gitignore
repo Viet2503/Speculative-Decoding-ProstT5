@@ -1,0 +1,9 @@
+# Local dev venv for the HMM build (see build_hmm.py)
+.hmm_venv/
+
+# Pfam MSA + built HMM artifacts (downloaded / generated per-machine)
+hmm_data/
+
+# macOS / Python cruft
+.DS_Store
+__pycache__/
