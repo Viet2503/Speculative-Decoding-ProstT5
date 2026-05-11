@@ -4,6 +4,23 @@ Profile-HMM drafter for inverse folding (3Di → AA), Pfam PF00535. **Task is do
 
 Builds on top of `prostT5_baseline_performance.ipynb` in this folder — same setup cells, same test set, same timing helpers.
 
+## First-time setup (new contributor)
+
+```bash
+# from prostT5/
+python3 -m venv .hmm_venv
+source .hmm_venv/bin/activate           # Windows: .hmm_venv\Scripts\activate
+pip install -r requirements-hmm.txt
+
+# H1: download Pfam PF00535 SEED, build the HMM, write to hmm_data/
+python build_hmm.py
+
+# H2: no-GPU sanity check of the drafter end-to-end
+python hmm_drafter.py --smoke
+```
+
+`hmm_data/` and `.hmm_venv/` are gitignored — both regenerate per-machine. The notebook (`prostT5_baseline_performance.ipynb`) runs on **Colab T4**, not in the local venv; Colab installs ProstT5 / transformers / torch from cells at the top of the notebook.
+
 ## Setup
 
 - [x] Team-standard Colab runtime: **T4**. Pin it for every benchmark run (hard constraint #3).
