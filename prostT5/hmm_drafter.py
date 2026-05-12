@@ -84,6 +84,24 @@ def aa_to_vocab_map(tokenizer) -> torch.LongTensor:
     return torch.tensor(ids, dtype=torch.long)
 
 
+def token_id_to_aa(tokenizer, token_id: int) -> str:
+    """Decode one tokenizer id to a single AA letter, or "" if it is not an
+    amino-acid token (for example EOS).
+    """
+    s = tokenizer.decode([token_id], skip_special_tokens=True)
+    s = "".join(s.split())
+    return s if len(s) == 1 else ""
+
+
+def aa_token_ids(tokenizer, token_ids: list[int]) -> list[int]:
+    """Filter a token-id list down to single-letter amino-acid tokens."""
+    out: list[int] = []
+    for token_id in token_ids:
+        if token_id_to_aa(tokenizer, token_id):
+            out.append(int(token_id))
+    return out
+
+
 # ---------------------------------------------------------------------------
 # HMM drafter
 # ---------------------------------------------------------------------------
@@ -114,12 +132,14 @@ class HMMDrafter:
         self.tokenizer_hash = tokenizer_vocab_hash(tokenizer)
 
         alphabet = pyhmmer.easel.Alphabet.amino()
+        self._alphabet = alphabet
         self.hmm = _load_hmm(hmm_path)
+        self._tokenizer = tokenizer
 
-        E_rows, match_col = emission_matrix(
+        e_rows, match_col = emission_matrix(
             self.hmm, alphabet, target_aa_seq, "drafter"
         )
-        E = torch.tensor(E_rows, dtype=torch.float32)
+        E = torch.tensor(e_rows, dtype=torch.float32)
         if E.shape != (len(target_aa_seq), 20):
             raise RuntimeError(
                 f"emission matrix has unexpected shape {tuple(E.shape)}; "
@@ -149,9 +169,14 @@ class HMMDrafter:
             return []
         return self._vocab_ids[self._cursor : self._cursor + K].tolist()
 
-    def commit(self, n_accepted: int) -> None:
+    def commit(
+        self,
+        n_accepted: int,
+        verified_token_ids: list[int] | None = None,
+    ) -> None:
         if n_accepted < 0:
             raise ValueError("n_accepted must be >= 0")
+        _ = verified_token_ids
         self._cursor = min(self._cursor + n_accepted, self.L)
 
     def reset(self) -> None:
@@ -166,6 +191,67 @@ class HMMDrafter:
     @property
     def emission_argmax_vocab_ids(self) -> torch.LongTensor:
         return self._vocab_ids.clone()
+
+
+class PrefixAwareHMMDrafter(HMMDrafter):
+    """Prefix-aware drafter that re-anchors the HMM at each block boundary.
+
+    The naive drafter aligns the full template once and then proposes by fixed
+    position. This variant replaces the already-verified prefix of the template
+    with the verifier's accepted residues, realigns that hybrid sequence to the
+    HMM, and then reads out the next positions from the refreshed emission
+    matrix. That makes proposals depend on the current verified prefix instead
+    of only on absolute output position.
+    """
+
+    def __init__(self, hmm_path: str | Path, target_aa_seq: str, tokenizer):
+        super().__init__(hmm_path, target_aa_seq, tokenizer)
+        self._verified_prefix: list[str] = []
+        self.reanchor_calls = 0
+
+    def reset(self) -> None:
+        super().reset()
+        self._verified_prefix = []
+        self.reanchor_calls = 0
+
+    def _reanchor_from_prefix(self) -> None:
+        prefix = "".join(self._verified_prefix)
+        hybrid_seq = prefix + self.target_aa_seq[len(prefix):]
+        e_rows, match_col = emission_matrix(
+            self.hmm, self._alphabet, hybrid_seq, "prefix-aware"
+        )
+        E = torch.tensor(e_rows, dtype=torch.float32)
+        self.match_col = match_col
+        self._E = E
+        self._aa_argmax = E.argmax(dim=-1)
+        self._vocab_ids = self._aa_to_vocab[self._aa_argmax]
+        self.reanchor_calls += 1
+
+    def commit(
+        self,
+        n_accepted: int,
+        verified_token_ids: list[int] | None = None,
+    ) -> None:
+        if n_accepted < 0:
+            raise ValueError("n_accepted must be >= 0")
+        if verified_token_ids is None:
+            verified_token_ids = []
+
+        chars = [token_id_to_aa(self._tokenizer, token_id) for token_id in verified_token_ids]
+        chars = [char for char in chars if char]
+        if n_accepted != len(chars):
+            raise ValueError(
+                f"prefix-aware commit expected {n_accepted} AA tokens, got {len(chars)}"
+            )
+
+        if not chars:
+            return
+
+        self._verified_prefix.extend(chars)
+        self._verified_prefix = self._verified_prefix[:self.L]
+        self._cursor = len(self._verified_prefix)
+        if self._cursor < self.L:
+            self._reanchor_from_prefix()
 
 
 # ---------------------------------------------------------------------------
@@ -393,7 +479,8 @@ def spec_decode_greedy(
         # Advance the drafter cursor by the number of new tokens. Capped at
         # k_eff+1 (proposals + the verifier extra), because we never advance
         # past tokens the drafter actually generated.
-        drafter.commit(min(emit_count, k_eff + 1))
+        verified_aa_ids = aa_token_ids(tokenizer, new_tokens[:emit_count])
+        drafter.commit(len(verified_aa_ids), verified_token_ids=verified_aa_ids)
 
         last_token = generated[-1]
         if hit_eos:
@@ -545,6 +632,14 @@ def _smoke() -> int:
     assert drafter.propose(5) == [], "propose past end must return []"
     print("  cursor mechanics OK")
 
+    prefix_aware = PrefixAwareHMMDrafter(hmm_path, aa, tok)
+    prefix_head = prefix_aware.propose(4)
+    prefix_aware.commit(4, verified_token_ids=prefix_head)
+    assert prefix_aware.cursor == 4, "prefix-aware cursor did not advance"
+    assert prefix_aware.reanchor_calls == 1, "prefix-aware drafter did not re-anchor"
+    assert prefix_aware.propose(4), "prefix-aware proposals unexpectedly empty"
+    print("  prefix-aware re-anchoring OK")
+
     # tokenizer hash stability
     h1 = tokenizer_vocab_hash(tok)
     h2 = tokenizer_vocab_hash(tok)
@@ -572,4 +667,5 @@ if __name__ == "__main__":
     if args.smoke:
         sys.exit(_smoke())
     sys.exit("Nothing to do. Pass --smoke for the no-GPU smoke test, or import "
-             "HMMDrafter / spec_decode_greedy / assert_bit_exact from a notebook.")
+             "HMMDrafter / PrefixAwareHMMDrafter / spec_decode_greedy / "
+             "assert_bit_exact from a notebook.")

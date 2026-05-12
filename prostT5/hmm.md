@@ -1,180 +1,189 @@
-# Profile-HMM Drafter
+# Profile-HMM Drafter For ProstT5
 
-This repository slice implements a Profile-HMM drafter for speculative decoding with ProstT5. The scope is inverse folding only: given a 3Di sequence, generate amino acids (3Di -> AA). The HMM family currently targeted is Pfam `PF00535` (`Glycos_transf_2`), with `P39621` used as the in-family validation protein.
+This part of the project implements a profile-HMM drafter for ProstT5 in the
+inverse-folding direction, `3Di -> AA`. The verifier is still the full
+ProstT5 encoder-decoder. The drafter is a much cheaper family-aware model that
+proposes amino-acid tokens in blocks before the verifier checks them.
 
-The high-level goal is to use a cheap Profile-HMM proposal model as the drafter and the full ProstT5 encoder-decoder as the verifier. Correctness is defined as bit-exact equality with greedy ProstT5 encoder-decoder generation.
+The family we use is Pfam `PF00535` (`Glycos_transf_2`), which matches the
+glycosyltransferase focus from the course description. The in-family target we
+use for validation is `P39621` (SpsA from *B. subtilis*).
 
-## Repository Status
+## Why a profile HMM helps here
 
-Implemented:
+Speculative decoding only helps if the drafter is both:
 
-- `build_hmm.py`: downloads the Pfam SEED alignment, builds the PF00535 HMM, length-prunes emissions to target proteins, and runs offline validation.
-- `hmm_drafter.py`: wraps the HMM emissions as a speculative drafter and implements a custom greedy Leviathan-style verify loop.
-- `requirements-hmm.txt`: local dependencies for the HMM build and smoke test.
-- `hmm_plan.md`: operational checklist and benchmark plan.
+1. Cheaper than the verifier.
+2. Correlated enough with the verifier that some proposals are accepted.
 
-Not implemented yet:
+A profile HMM is useful because it gives us a family-level amino-acid prior at
+each aligned position. Once we align the target protein to the HMM, we can
+prune the family model down to the target length and obtain one amino-acid
+distribution per residue position.
 
-- Notebook integration for full HMM timing on the shared benchmark set.
-- K sweep over `K in {1, 2, 4, 8, 16}`.
-- Final HMM latency / throughput / vRAM / acceptance-rate plots.
-- Prefix-aware HMM variant.
+That gives us a drafter with three good properties:
 
-## What The HMM Code Does
+1. It is cheap compared with running the full ProstT5 decoder.
+2. It is biologically meaningful because it reflects conservation in the family
+  MSA.
+3. It can be made either prefix-blind or prefix-aware, which lets us compare a
+  simple baseline against the more interesting adaptive variant.
 
-### H1: Build and validate a PF00535 Profile HMM
+## Overall workflow
 
-`build_hmm.py` performs the offline HMM construction work:
+The HMM path in this repository is split into two stages.
 
-1. Downloads the Pfam `PF00535` SEED alignment from InterPro.
-2. Reads the Stockholm MSA with `pyhmmer`.
-3. Builds a Plan7 profile HMM with:
-   - `pyhmmer.plan7.Builder`
-   - `architecture="fast"`
-   - `seed=42`
-4. Writes the HMM to `hmm_data/PF00535.hmm`.
-5. Fetches validation proteins from UniProt:
-   - `P39621`: in-family GT-2 target, length 256
-   - `P04637`: out-of-family p53 target, length 393
-6. Aligns each target sequence to the HMM with `hmmalign`.
-7. Converts the alignment into a length-pruned emission matrix `E` with shape:
+### 1. Build a family HMM and prune it to the target length
 
-```text
-L_target x 20
-```
+`build_hmm.py` does the offline biological preprocessing:
 
-Each row corresponds to one residue position in the target sequence. Columns follow the canonical amino-acid order:
+1. Download the Pfam `PF00535` SEED alignment from InterPro.
+2. Build a Plan7 profile HMM with `pyhmmer.plan7.Builder`.
+3. Align the target protein sequence to that HMM.
+4. Read out a length-pruned emission matrix
+  `E in R^{L_target x 20}`.
+
+Each row of `E` corresponds to one target residue. The 20 columns follow the
+canonical amino-acid order:
 
 ```text
 ACDEFGHIKLMNPQRSTVWY
 ```
 
-For target residues aligned to HMM match columns, the row uses the HMM match-state emission distribution. For residues aligned to insert columns, the row uses the HMM background residue frequencies.
+If the residue is aligned to an HMM match state, the row uses the match-state
+emission distribution. If it lands in an insert state, we use the HMM
+background distribution.
 
-### H1 validation results recorded in the plan
+This gives us a family-aware, target-length-aligned prior over amino acids.
 
-The current validation numbers in `hmm_plan.md` are:
+### 2. Use the pruned HMM as a speculative drafter
 
-- PF00535 SEED MSA: 131 sequences, alignment width 250, average sequence length 169.3.
-- Built HMM: `M = 168` match columns.
-- The consensus contains the GT-2 `DXD` motif.
-- For `P39621`, 157 of 256 residues align to match columns; 99 align to insert columns.
-- Argmax identity vs true AA:
-  - Overall: 18.4% (`47/256`)
-  - Match-column only: 23.6% (`37/157`)
-- True-AA log likelihood:
-  - `P39621`: `-2.602` nat/residue
-  - `P04637`: `-2.912` nat/residue
-  - Delta: `+0.311` nat/residue in favor of the in-family protein
+`hmm_drafter.py` converts those emissions into ProstT5 vocabulary proposals and
+plugs them into a custom greedy Leviathan-style verification loop.
 
-The key interpretation is that the HMM is aligned and family-aware, but its per-position argmax is weak. PF00535 is broad and its emission distributions are flat, so the HMM is not a strong direct AA predictor.
+The key public surface is:
 
-## HMM Drafter
+- `HMMDrafter`: naive prefix-blind drafter.
+- `PrefixAwareHMMDrafter`: prefix-aware re-anchoring drafter.
+- `spec_decode_greedy(...)`: speculative verification loop for ProstT5.
+- `assert_bit_exact(...)`: checks speculative output against greedy enc-dec.
 
-`hmm_drafter.py` defines `HMMDrafter`.
+## The two drafter variants
 
-At construction time, `HMMDrafter`:
+### Naive variant: prefix-blind
 
-1. Loads `hmm_data/PF00535.hmm`.
-2. Aligns the target AA sequence to the HMM.
-3. Builds the length-pruned emission matrix through `build_hmm.emission_matrix`.
-4. Takes the argmax amino acid at each target position.
-5. Maps those 20 amino-acid classes into ProstT5 tokenizer vocabulary IDs.
-6. Caches the resulting vocab-ID sequence.
+The naive drafter is implemented by `HMMDrafter`.
 
-During decoding, the drafter exposes:
+It aligns the full target to the HMM once at construction time, computes the
+length-pruned emission matrix once, maps its per-position amino-acid argmax to
+ProstT5 vocabulary IDs, and then proposes by absolute output position.
 
-- `propose(K)`: returns the next `K` proposed token IDs.
-- `commit(n_accepted)`: advances the drafter cursor.
-- `remaining()`: reports how many target positions are left.
-- `reset()`: returns the drafter to position zero.
+That means:
 
-The current drafter is prefix-blind. It proposes by absolute output position only and does not condition on the verified prefix. This is correct for speculative decoding because the verifier can reject bad proposals, but it limits the acceptance rate.
+- proposals are cheap,
+- the target length stays fixed and aligned 1:1 with the template,
+- but the drafter never reacts to what the verifier actually accepted.
 
-## Tokenizer Safety
+So the naive variant is a good baseline, but it is stale after the first wrong
+agreement between template and verified prefix.
 
-The HMM drafter proposes ProstT5 vocab IDs, not raw amino-acid characters. To avoid silent correctness bugs, `hmm_drafter.py` hashes the tokenizer vocabulary:
+### Prefix-aware variant: re-anchor on the verified prefix
 
-```python
-tokenizer_vocab_hash(tokenizer)
-```
+The prefix-aware drafter is implemented by `PrefixAwareHMMDrafter`.
 
-`HMMDrafter` snapshots the hash at construction time. `spec_decode_greedy` checks that the verifier tokenizer has the same hash before decoding. This enforces the project constraint that drafter and verifier share the same tokenizer / vocab mapping.
+At each block boundary it:
 
-## Greedy Speculative Verify Loop
+1. Takes the amino-acid tokens that the verifier has already committed.
+2. Replaces the corresponding prefix of the template sequence with those
+  verified residues.
+3. Re-aligns that hybrid sequence to the profile HMM.
+4. Recomputes the remaining pruned emission rows for the suffix.
 
-`spec_decode_greedy` implements a custom Leviathan-style greedy verification loop for the ProstT5 encoder-decoder model.
+This is the HMM version of conditioning on the verified decoder state.
 
-The loop:
+In short:
 
-1. Encodes the 3Di input once.
-2. Maintains the decoder self-attention KV cache.
-3. At each step, asks the HMM drafter for up to `K` proposed tokens.
-4. Feeds `[last_token, *proposals]` through the verifier.
-5. Accepts the longest proposal prefix whose tokens match the verifier argmax.
-6. On first mismatch, emits the verifier argmax token.
-7. On full acceptance, emits the verifier's extra "+1" token.
-8. Prunes the self-attention KV cache to the verified output length.
+- naive drafter: proposals depend only on absolute position
+- prefix-aware drafter: proposals depend on absolute position and the already
+  verified prefix
 
-The reference output is produced by `encdec_greedy_reference`, which mirrors the notebook's greedy encoder-decoder settings. `assert_bit_exact` compares speculative decoding against that reference and raises if any token differs.
+The prefix-aware variant is more expensive because it realigns after each block,
+but it is the more interesting experiment because it can adapt when the
+verified prefix deviates from the one-shot template alignment.
 
-## Current Bit-Exact Findings
+## Why the prefix-aware version matters
 
-The plan records successful bit-exact checks:
+The naive drafter mostly measures how much family conservation alone helps.
+Its acceptance rate is limited by how often the static HMM proposal agrees with
+ProstT5.
 
-- `P39621`, `K=4`: spec output equals greedy encoder-decoder output.
-  - Output length: 257 including EOS
-  - Accepted: 52 / 813
-  - Acceptance rate: 6.4%
-  - Steps: 205
-  - Free tokens: 3
-- `A0A6G0XC32`, `K=4`: spec output equals greedy encoder-decoder output.
-  - Output length: 164 including EOS
-  - Accepted: 33 / 514
-  - Acceptance rate: 6.4%
-  - Steps: 131
-  - Free tokens: 1
+The prefix-aware variant adds the missing feedback loop:
 
-Important caveat: strict bit-exactness required fp32 in the recorded tests. In fp16, near-tied logits can flip between batched verifier calls and single-token greedy generation, even though the decoding logic is mathematically equivalent.
+1. Verified residues can change the effective alignment path.
+2. A changed alignment path changes the next emissions.
+3. Better next emissions can improve the next speculative block.
 
-## Expected Performance
+That makes the prefix-aware variant the more interesting answer to the project
+prompt. It is closer to a true state-aware drafter rather than just a static
+position-wise baseline.
 
-The measured acceptance rate so far is low: about 6.4% at `K=4`.
+## What the current code implements
 
-This is consistent with the weak HMM argmax identity observed in H1. Because the HMM proposals rarely match ProstT5's greedy argmax, the verifier rejects often. The plan notes that at `alpha = 0.064` and `K = 4`, the expected emitted tokens per speculative step are only about `1.07`. Since the verifier still does a larger batched step each iteration, this prefix-blind HMM drafter is unlikely to beat plain encoder-decoder generation on wall clock.
+### `build_hmm.py`
 
-The likely path to a stronger result is H5: a prefix-aware HMM variant that recomputes or conditions proposal distributions on the verified prefix.
+- Downloads the PF00535 SEED alignment.
+- Builds the profile HMM.
+- Aligns in-family and out-of-family targets.
+- Produces the target-length-pruned emission matrix.
+- Validates that the HMM is biologically sensible.
 
-## How To Run
+### `hmm_drafter.py`
 
-From `prostT5/`:
+- Builds the 20-class to ProstT5-vocab mapping.
+- Implements the naive prefix-blind drafter.
+- Implements the prefix-aware re-anchoring drafter.
+- Implements the greedy speculative verification loop.
+- Provides a smoke test that covers the drafter mechanics without needing a GPU.
 
-```bash
-python3 -m venv .hmm_venv
-source .hmm_venv/bin/activate
-pip install -r requirements-hmm.txt
-```
+### `prostT5_baseline_performance.ipynb`
 
-Build the HMM and validation artifacts:
+The notebook is the evaluation surface. It is extended to:
 
-```bash
-python build_hmm.py
-```
+1. Build or refresh the PF00535 HMM artifacts.
+2. Assemble in-family and out-of-family evaluation proteins.
+3. Run both HMM drafter variants.
+4. Sweep over `K in {1, 2, 4, 8, 16}`.
+5. Print only the important results:
+  - bit-exact status
+  - acceptance rate
+  - latency
+  - throughput
+  - peak vRAM
+6. Save HMM-specific CSV summaries for later analysis.
 
-Run the no-GPU drafter smoke test:
+## Practical caveat
 
-```bash
-python hmm_drafter.py --smoke
-```
+Strict bit-exact speculative verification is still most reliable in fp32.
+Under fp16, near-tied logits can flip when the verifier processes a speculative
+block instead of one token at a time. That caveat applies to both HMM
+variants.
 
-Generated artifacts are written to `hmm_data/`, which is gitignored and expected to be regenerated per machine.
+## Summary
 
-## File Map
+What we are doing:
 
-- `build_hmm.py`: HMM construction, emission extraction, validation.
-- `hmm_drafter.py`: HMM drafter, tokenizer checks, speculative verify loop, smoke test.
-- `hmm_plan.md`: checklist, recorded validation results, next benchmark tasks.
-- `requirements-hmm.txt`: local HMM dependencies.
-- `prostT5_baseline_performance.ipynb`: baseline benchmark notebook that still needs HMM benchmark cells.
-- `README.md`: baseline ProstT5 encoder-decoder vs encoder-CNN benchmark notes.
+1. Build a glycosyltransferase profile HMM from a family MSA.
+2. Prune it to the target protein's length so positions line up 1:1.
+3. Use it as a cheap speculative drafter for ProstT5 inverse folding.
+4. Compare a naive prefix-blind variant against a prefix-aware re-anchoring
+  variant.
+
+Why this helps:
+
+1. The HMM is cheaper than the full verifier.
+2. It injects a biologically meaningful family prior.
+3. The naive variant gives a clear baseline.
+4. The prefix-aware variant turns the HMM into a state-aware drafter, which is
+  the more interesting candidate for improved acceptance and speedup.
+
 
