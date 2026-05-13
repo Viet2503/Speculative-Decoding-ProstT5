@@ -1,0 +1,201 @@
+protein_id,bucket,label,variant,k,length,bit_exact,accept_rate,wall_s,tokens_per_s,peak_vram_gb,reanchor_calls
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,naive,1,421,False,0.1565934065934066,19.45025361099988,21.696375195917366,6.256187904,0
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,naive,2,421,True,0.09815078236130868,18.85157716699996,22.385394933359684,6.2563968,0
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,naive,4,421,True,0.054426705370101594,17.9644181030003,23.490880560696834,6.256814592,0
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,naive,8,421,True,0.02737226277372263,18.04657445199973,23.383939213640538,6.257649664,0
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,naive,16,421,True,0.013824884792626729,18.60488338899995,22.682216876968198,6.259322368,0
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,prefix_aware,1,421,False,0.15342465753424658,22.33569358800014,18.893525662740988,6.256187904,364
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,prefix_aware,2,421,True,0.0930888575458392,22.52061907799998,18.738383635831966,6.2563968,354
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,prefix_aware,4,421,True,0.050932568149210905,21.480636843999946,19.645600038058213,6.256814592,349
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,prefix_aware,8,421,True,0.025613275613275612,22.00071049799999,19.18119871803061,6.257649664,349
+O45293,in_family,in_family: Probable N-acetylgalactosaminyltransferase 8 (EC 2.4.1.-) (Protein-UDP a,prefix_aware,16,421,True,0.012934960830752414,22.19474170300009,19.013512553874765,6.259322368,349
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,1,260,True,0.2560386473429952,10.169364533999897,25.665320495433296,5.959876096,0
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,2,260,True,0.1636828644501279,10.742408551999915,24.296227306622928,5.960012288,0
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,4,260,True,0.09838274932614555,10.258569560999831,25.44214360959718,5.960149504,0
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,8,260,True,0.05140507196710076,10.001000205000082,26.097389726030695,5.960574976,0
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,16,260,False,0.026932493878978662,9.165878297000063,28.475176250749886,5.961923072,0
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,1,260,True,0.2560386473429952,12.564840354000125,20.772249598611765,5.959876096,206
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,2,260,True,0.1636828644501279,12.346141482000121,21.140208086916967,5.960012288,195
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,4,260,True,0.09838274932614555,11.636592331999964,22.42924668609941,5.960149504,186
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,8,260,True,0.05140507196710076,11.374434602999827,22.94619549099745,5.960574976,184
+O60762,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,16,260,False,0.026932493878978662,10.862484562999953,24.027652098031446,5.961923072,182
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,1,260,False,0.2682926829268293,10.96487954300028,23.803271068911673,5.959876096,0
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,2,260,False,0.16709511568123395,9.621780804000082,27.125955716169916,5.960012288,0
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,4,260,False,0.10410958904109589,10.227883830000337,25.51847521326329,5.960149504,0
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,8,260,False,0.05336105336105336,9.81558602799987,26.5903634541507,5.960574976,0
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,naive,16,260,False,0.027571580063626724,9.189308527999856,28.402572315939995,5.961923072,0
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,1,260,False,0.2682926829268293,12.285478387999774,21.244593963466652,5.959876096,204
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,2,260,False,0.16709511568123395,12.054360484999961,21.651915945667927,5.960012288,194
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,4,260,False,0.10410958904109589,11.383469437999793,22.92798354856046,5.960149504,183
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,8,260,False,0.05336105336105336,11.337053375999858,23.021855092658186,5.960574976,182
+O70152,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dolichol,prefix_aware,16,260,False,0.027571580063626724,11.393701928000155,22.9073923163278,5.961923072,181
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,naive,1,256,False,0.19626168224299065,11.506003682000028,22.33616528404648,5.954755072,0
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,naive,2,256,False,0.11538461538461539,11.330756385000086,22.68162788675101,5.955148288,0
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,naive,4,256,False,0.06396063960639606,10.409137298000132,24.6898462996906,5.95555072,0
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,naive,8,256,False,0.03302180685358255,10.57454970799995,24.303635341141018,5.956089856,0
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,naive,16,256,True,0.01721389862926363,11.125340525999945,23.100416513039796,5.957167616,0
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,prefix_aware,1,256,False,0.1743119266055046,12.767097468999964,20.12986903436953,5.954755072,217
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,prefix_aware,2,256,False,0.10377358490566038,12.453778307999983,20.63630760432839,5.955148288,211
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,prefix_aware,4,256,False,0.05790108564535585,12.53592129399999,20.501085957121212,5.95555072,207
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,prefix_aware,8,256,False,0.029932803909590716,12.846042702000204,20.00616111605978,5.956089856,206
+P39621,in_family,in_family: Spore coat polysaccharide biosynthesis protein SpsA,prefix_aware,16,256,True,0.015620118712902219,12.246199305000118,20.986103002183462,5.957167616,205
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",naive,1,346,True,0.16498316498316498,15.96754228299983,21.731584851943097,6.061541376,0
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",naive,2,346,True,0.10296684118673648,14.924123518999977,23.250946667536795,6.061715456,0
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",naive,4,346,True,0.05595026642984014,15.238509937000117,22.771255289039836,6.062066176,0
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",naive,8,346,False,0.02872531418312388,14.776615529000082,23.48304991213919,6.062767104,0
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",naive,16,346,True,0.014535543947308653,14.8131575660002,23.42512043458239,6.06399488,0
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",prefix_aware,1,346,True,0.16498316498316498,17.9123328390001,19.372127746782656,6.061541376,296
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",prefix_aware,2,346,True,0.10296684118673648,18.659465442000055,18.59645985457588,6.061715456,286
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",prefix_aware,4,346,True,0.05595026642984014,17.2759663869997,20.085707058397627,6.062066176,282
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",prefix_aware,8,346,False,0.02872531418312388,17.09462285299969,20.298780674129347,6.062767104,281
+Q67FW5,in_family,"in_family: Queuosine-tRNA galactosyltransferase (QTGAL) (EC 2.4.1.-) (Beta-1,3-N-ac",prefix_aware,16,346,True,0.014535543947308653,17.76350004899996,19.534438542112383,6.06399488,281
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,1,443,False,0.15968586387434555,20.826216711000143,21.31928262157595,6.256252928,0
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,2,443,True,0.10040705563093623,18.9379932249999,23.444933933859424,6.25647104,0
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,4,443,True,0.05702364394993046,18.569388677999996,23.910318627022285,6.256909824,0
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,8,443,True,0.028661307235232435,20.154992742000104,22.029281066163218,6.257785344,0
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,16,443,True,0.014469737074289748,18.806194920000053,23.609241629619287,6.259536384,0
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,1,443,False,0.15968586387434555,24.863472182999885,17.85752193949725,6.256252928,381
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,2,443,True,0.10204081632653061,23.70365274200003,18.731290271278958,6.25647104,367
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,4,443,True,0.05788005578800558,22.69234748100007,19.566067387772637,6.256909824,359
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,8,443,True,0.02909218366631616,23.1768920290001,19.157012055129943,6.257785344,359
+Q7Z4T8,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,16,443,True,0.014687665899840736,23.468141839000054,18.91926523394995,6.259536384,359
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,1,431,True,0.22443181818181818,19.317031814000075,22.36368424298534,6.2562176,0
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,2,431,False,0.15128593040847202,17.174789172000146,25.15314718996868,6.256430592,0
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,4,431,True,0.08712715855572999,17.150980850999986,25.188063805389433,6.2568576,0
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,8,431,True,0.04654895666131621,16.636094856,25.967632652935627,6.25771264,0
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,naive,16,431,False,0.02441526466967583,17.16959589699991,25.160755243836842,6.25942016,0
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,1,431,True,0.22443181818181818,22.093821238000146,19.552977972727685,6.2562176,351
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,2,431,False,0.15128593040847202,22.42878169400001,19.260965927345293,6.256430592,330
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,4,431,True,0.08712715855572999,20.800723984999877,20.76850788037619,6.2568576,319
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,8,431,True,0.04654895666131621,21.0710547890003,20.502058597726986,6.25771264,314
+Q9D4M9,in_family,in_family: Inactive polypeptide N-acetylgalactosaminyltransferase-like protein 5 (P,prefix_aware,16,431,False,0.02441526466967583,20.632126842999696,20.93821947137621,6.25942016,311
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,naive,1,246,True,0.24873096446700507,9.955988898000214,24.80918797022896,5.953676288,0
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,naive,2,246,True,0.14435695538057744,10.285271312000077,24.014923136915122,5.953806336,0
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,naive,4,246,True,0.08653846153846154,10.031384891000016,24.622721855843064,5.954066432,0
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,naive,8,246,True,0.04447533009034051,9.306629004000115,26.540222017428228,5.95458816,0
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,naive,16,246,True,0.022590893046240734,9.565314702999785,25.822464568001944,5.95563008,0
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,prefix_aware,1,246,True,0.24873096446700507,11.809660710999651,20.915080123338463,5.953676288,196
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,prefix_aware,2,246,True,0.14435695538057744,11.597409833000256,21.297859052731344,5.953806336,190
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,prefix_aware,4,246,True,0.08653846153846154,11.156584198000019,22.139392812029186,5.954066432,182
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,prefix_aware,8,246,True,0.04447533009034051,10.158569875000012,24.314446131621427,5.95458816,181
+Q9LM93,in_family,in_family: Dolichol-phosphate mannosyltransferase subunit 1 (EC 2.4.1.83) (Dol-P-Ma,prefix_aware,16,246,True,0.022590893046240734,10.894302255000184,22.672401978440963,5.95563008,181
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),naive,1,326,False,0.2734375,13.690802746999907,23.88464767499891,6.037897728,0
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),naive,2,326,False,0.1711340206185567,12.913865179999902,25.321621020671248,6.038063616,0
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),naive,4,326,False,0.1019522776572668,12.086675477999961,27.054585902897944,6.038396416,0
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),naive,8,326,False,0.05376940133037694,12.114895429000171,26.99156603673524,6.039061504,0
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),naive,16,326,False,0.028604118993135013,11.810222501000226,27.687878020274884,6.040391168,0
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),prefix_aware,1,326,False,0.26356589147286824,14.451221280000027,22.62784533322151,6.037897728,257
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),prefix_aware,2,326,False,0.1656441717791411,13.965215671000351,23.415320443567232,6.038063616,244
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),prefix_aware,4,326,False,0.10043196544276457,13.227084458999798,24.72200136119241,6.038396416,232
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),prefix_aware,8,326,False,0.052980132450331126,13.06705854000029,25.024759703876917,6.039061504,229
+Q9VLQ1,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (EC 2.4.1.117) (Wollknaeuel),prefix_aware,16,326,False,0.028189066059225512,13.09883266299994,24.96405660052988,6.040391168,226
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,naive,1,324,False,0.2908366533864542,13.41123980600014,24.233404569695054,6.035534336,0
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,naive,2,324,False,0.18683651804670912,12.55601271699993,25.884013287114115,6.0356992,0
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,naive,4,324,False,0.11399548532731377,11.587409765000075,28.04768335557329,6.03602944,0
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,naive,8,324,True,0.06004618937644342,11.439563935000024,28.410173835878766,6.036690944,0
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,naive,16,324,True,0.031854718666269724,11.777095219999865,27.59593889060903,6.03801344,0
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,prefix_aware,1,324,False,0.2607003891050584,14.757262317999903,22.023055021769665,6.035534336,256
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,prefix_aware,2,324,False,0.1670103092783505,13.970630349999965,23.26308776754664,6.0356992,242
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,prefix_aware,4,324,True,0.09827213822894168,13.291731080999853,24.451292161980177,6.03602944,232
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,prefix_aware,8,324,True,0.05266075388026607,13.296306576999996,24.442878036686242,6.036690944,228
+Q9Y673,in_family,in_family: Dolichyl-phosphate beta-glucosyltransferase (DolP-glucosyltransferase) (,prefix_aware,16,324,True,0.02797602055381102,13.061788753999963,24.881737572158634,6.03801344,225
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,naive,1,163,True,0.23484848484848486,6.444370746999994,25.44856688705346,5.852780544,0
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,naive,2,163,True,0.1274131274131274,7.396628163000059,22.17226503562427,5.85287936,0
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,naive,4,163,True,0.06420233463035019,6.878961603999869,23.840807587098595,5.85307904,0
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,naive,8,163,True,0.03260869565217391,6.988263393000125,23.467919106236394,5.853476864,0
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,naive,16,163,True,0.0167853509664293,6.48962097399999,25.271121481061744,5.854272512,0
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,prefix_aware,1,163,True,0.21641791044776118,7.477733850000277,21.93177816832755,5.852780544,133
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,prefix_aware,2,163,True,0.11787072243346007,7.079730474999906,23.16472365425778,5.85287936,131
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,prefix_aware,4,163,True,0.05938697318007663,7.081690482999875,23.158312325806136,5.85307904,131
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,prefix_aware,8,163,True,0.030155642023346304,7.396041424000032,22.174023994487474,5.853476864,131
+A0A6G0XC32,out_of_family,out_of_family: A0A6G0XC32,prefix_aware,16,163,True,0.015562248995983935,6.990091949000089,23.461780073359364,5.854272512,131
+A0PK11,out_of_family,out_of_family: Clarin-2,naive,1,232,True,0.17766497461928935,10.474144911000167,22.245252665475203,5.953635328,0
+A0PK11,out_of_family,out_of_family: Clarin-2,naive,2,232,True,0.1196808510638298,9.663939850000133,24.11024940309379,5.953759744,0
+A0PK11,out_of_family,out_of_family: Clarin-2,naive,4,232,True,0.06174496644295302,9.17588531299998,25.392645183772743,5.954008064,0
+A0PK11,out_of_family,out_of_family: Clarin-2,naive,8,232,True,0.032038173142467624,9.784421938999913,23.813363881138535,5.954504704,0
+A0PK11,out_of_family,out_of_family: Clarin-2,naive,16,232,True,0.016336461591936045,9.878738313999747,23.5860079085,5.955495936,0
+A0PK11,out_of_family,out_of_family: Clarin-2,prefix_aware,1,232,True,0.1717171717171717,10.371413784999731,22.46559676724016,5.953635328,197
+A0PK11,out_of_family,out_of_family: Clarin-2,prefix_aware,2,232,True,0.1164021164021164,10.18482924,22.87716313248665,5.953759744,188
+A0PK11,out_of_family,out_of_family: Clarin-2,prefix_aware,4,232,True,0.06008010680907877,10.515400645000227,22.15797646386254,5.954008064,187
+A0PK11,out_of_family,out_of_family: Clarin-2,prefix_aware,8,232,True,0.031186440677966103,10.423061451999729,22.354276723111663,5.954504704,186
+A0PK11,out_of_family,out_of_family: Clarin-2,prefix_aware,16,232,True,0.015900449360525405,9.606001513000137,24.25566971696527,5.955495936,186
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,naive,1,330,True,0.018518518518518517,16.6880946629999,19.834499185450955,6.042627072,0
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,naive,2,330,True,0.00927357032457496,16.72254729000042,19.793635159753922,6.042793984,0
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,naive,4,330,True,0.005443234836702955,16.408216996000192,20.17281951358197,6.043130368,0
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,naive,8,330,True,0.0027386541471048514,18.317691390000164,18.069962690860525,6.043802624,0
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,naive,16,330,True,0.0013866877971473852,16.725625936000142,19.78999179262747,6.045146624,0
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,prefix_aware,1,330,True,0.018518518518518517,17.685819622000054,18.71555896613673,6.042627072,323
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,prefix_aware,2,330,True,0.00927357032457496,18.067632902999776,18.32005342244052,6.042793984,323
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,prefix_aware,4,330,True,0.005443234836702955,18.220773697000368,18.166078208550033,6.043130368,322
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,prefix_aware,8,330,True,0.0027386541471048514,17.451503080999828,18.966847638492148,6.043802624,322
+A1A519,out_of_family,out_of_family: Protein FAM170A (Zinc finger domain-containing protein) (Zinc finger pro,prefix_aware,16,330,True,0.0013866877971473852,17.476268236000124,18.939970223057045,6.045146624,322
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,naive,1,88,True,0.29411764705882354,3.31536812899958,26.844681054123527,5.75657216,0
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,naive,2,88,True,0.1889763779527559,3.145553795000069,28.293904921119953,5.75657216,0
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,naive,4,88,True,0.09523809523809523,3.600938901999598,24.715776196752017,5.756840448,0
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,naive,8,88,True,0.0486815415821501,3.6778242140003385,24.199090228729407,5.75710976,0
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,naive,16,88,True,0.025423728813559324,3.125242565999997,28.477789522082197,5.757917184,0
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,prefix_aware,1,88,True,0.35384615384615387,3.2689595070000905,27.225788453303572,5.75657216,64
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,prefix_aware,2,88,True,0.2231404958677686,3.6060510590000376,24.680737611263833,5.75657216,60
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,prefix_aware,4,88,True,0.1125,3.564863655999943,24.96589171095115,5.756840448,60
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,prefix_aware,8,88,True,0.057569296375266525,3.163286548999622,28.135294928670287,5.75710976,60
+A1L190,out_of_family,out_of_family: Synaptonemal complex central element protein 3 (Testis highly expressed ,prefix_aware,16,88,True,0.030133928571428572,3.100508496999737,28.70496890626891,5.757917184,60
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,naive,1,281,True,0.11067193675889328,13.025594931999876,21.649682910621827,5.98470144,0
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,naive,2,281,True,0.05765407554671968,13.137912003999645,21.46459802091453,5.984846848,0
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,naive,4,281,True,0.028942115768463075,13.097236724999675,21.531259296987855,5.985138176,0
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,naive,8,281,True,0.014587525150905433,13.001979247000236,21.68900554621804,5.985721856,0
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,naive,16,281,True,0.00740929994890138,13.031620127000224,21.63967313747306,5.986889728,0
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,prefix_aware,1,281,True,0.1062992125984252,13.97912747700002,20.172932857503234,5.98470144,253
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,prefix_aware,2,281,True,0.055445544554455446,13.899351184999887,20.288716807467463,5.984846848,252
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,prefix_aware,4,281,True,0.027833001988071572,13.96095319799997,20.199193851634643,5.985138176,252
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,prefix_aware,8,281,True,0.014028056112224449,13.9206471399998,20.25767891132711,5.985721856,252
+A1L3X0,out_of_family,out_of_family: Very long chain fatty acid elongase 7 (EC 2.3.1.199) (3-keto acyl-CoA sy,prefix_aware,16,281,True,0.0071246819338422395,13.966976063999937,20.19048351681927,5.986889728,252
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,naive,1,115,True,0.21052631578947367,4.858209391999935,23.87710998851108,5.788481024,0
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,naive,2,115,True,0.13259668508287292,4.3965519909997965,26.384312124015405,5.788573696,0
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,naive,4,115,True,0.07803468208092486,5.22705143300027,22.19224384662641,5.788760064,0
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,naive,8,115,True,0.03994082840236687,4.286072986999898,27.0644014583606,5.789133312,0
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,naive,16,115,True,0.020914020139426802,4.386515273999976,26.4446816559747,5.789879296,0
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,prefix_aware,1,115,True,0.21052631578947367,5.750806832000308,20.171082665221714,5.788481024,94
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,prefix_aware,2,115,True,0.13259668508287292,4.695202263000283,24.706070900101075,5.788573696,90
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,prefix_aware,4,115,True,0.07803468208092486,4.461317911000151,26.00128534081419,5.788760064,87
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,prefix_aware,8,115,True,0.03994082840236687,5.437323469000148,21.334025952539267,5.789133312,87
+A2RU14,out_of_family,out_of_family: Transmembrane protein 218,prefix_aware,16,115,True,0.020914020139426802,4.42705512800012,26.202519879711076,5.789879296,87
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,naive,1,315,True,0.125,14.430846037000265,21.897538036909637,6.024894464,0
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,naive,2,315,False,0.06463195691202872,14.348297071000161,22.023519476654727,6.025055232,0
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,naive,4,315,False,0.032432432432432434,14.335611686000448,22.043007785192188,6.025376768,0
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,naive,8,315,True,0.016296966953372568,15.393703368000388,20.52787379656048,6.026021888,0
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,naive,16,315,False,0.007994518044769302,14.43105571400065,21.89721987514917,6.027312128,0
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,prefix_aware,1,315,True,0.125,15.554005795999728,20.316309775406587,6.024894464,279
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,prefix_aware,2,315,False,0.06463195691202872,15.41878541799997,20.494480689192287,6.025055232,278
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,prefix_aware,4,315,False,0.032432432432432434,15.39486184299949,20.52632905852902,6.025376768,278
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,prefix_aware,8,315,True,0.016296966953372568,15.593705663000037,20.26458667549362,6.026021888,278
+A2RUC4,out_of_family,out_of_family: tRNA wybutosine-synthesizing protein 5 (hTYW5) (tRNA yW-synthesizing pro,prefix_aware,16,315,False,0.007994518044769302,15.527065906000644,20.351559136351547,6.027312128,279
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,naive,1,379,True,0.09855072463768116,17.726853860999654,21.436403942835405,6.100552704,0
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,naive,2,379,True,0.06408345752608048,17.136242438999943,22.175223147821924,6.100742144,0
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,naive,4,379,True,0.03469079939668175,17.366376376000517,21.881363836219826,6.100932096,0
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,naive,8,379,True,0.017391304347826087,17.79597860300055,21.353138733035387,6.101881856,0
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,naive,16,379,True,0.00877527661198016,17.169624791000388,22.132108571130825,6.10321408,0
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,prefix_aware,1,379,True,0.09855072463768116,19.052962070999456,19.9444054202154,6.100552704,344
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,prefix_aware,2,379,True,0.06408345752608048,19.22438169599991,19.766565500469024,6.100742144,335
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,prefix_aware,4,379,True,0.03469079939668175,18.0974332779997,20.99745274165206,6.100932096,332
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,prefix_aware,8,379,True,0.017391304347826087,18.44851228599964,20.597866869101285,6.101881856,332
+A4GXA9,out_of_family,out_of_family: Structure-specific endonuclease subunit EME2 (Essential meiotic structur,prefix_aware,16,379,True,0.00877527661198016,18.870164590999593,20.137609196119396,6.10321408,332
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",naive,1,110,True,0.0891089108910891,5.329621824000242,20.82699367151101,5.78257152,0
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",naive,2,110,True,0.07329842931937172,4.675165163000202,23.742476710441558,5.78257152,0
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",naive,4,110,True,0.04289544235924933,5.560188439000285,19.963352180912356,5.782664192,0
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",naive,8,110,True,0.02168021680216802,4.502700554000057,24.651872508241993,5.783035392,0
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",naive,16,110,True,0.011188811188811189,4.618589536999934,24.033311276260655,5.783960064,0
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",prefix_aware,1,110,True,0.0891089108910891,6.046290084999782,18.358364954301393,5.78257152,100
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",prefix_aware,2,110,True,0.07329842931937172,4.700035318000118,23.61684380857608,5.78257152,95
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",prefix_aware,4,110,True,0.04289544235924933,5.07491457199967,21.87228936077689,5.782664192,93
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",prefix_aware,8,110,True,0.02168021680216802,5.2253628869998465,21.24254380038491,5.783035392,93
+P01308,out_of_family,"out_of_family: Insulin [Cleaved into: Insulin B chain, Insulin A chain]",prefix_aware,16,110,True,0.011188811188811189,4.701900414999727,23.607475744465855,5.783960064,93
+P04637,out_of_family,out_of_family: P04637,naive,1,393,True,0.05361930294906166,19.055965347999972,20.675940200602454,6.256105472,0
+P04637,out_of_family,out_of_family: P04637,naive,2,393,True,0.034013605442176874,19.121533477999947,20.605041978108712,6.25630208,0
+P04637,out_of_family,out_of_family: P04637,naive,4,393,True,0.017053206002728513,19.653641437999795,20.047175544691246,6.25669376,0
+P04637,out_of_family,out_of_family: P04637,naive,8,393,True,0.008573388203017833,19.222999455999798,20.496281077354265,6.257480192,0
+P04637,out_of_family,out_of_family: P04637,naive,16,393,True,0.004334257975034674,19.936833151999963,19.76241647788861,6.25905152,0
+P04637,out_of_family,out_of_family: P04637,prefix_aware,1,393,True,0.05361930294906166,20.70864883000013,19.025867077779672,6.256105472,372
+P04637,out_of_family,out_of_family: P04637,prefix_aware,2,393,True,0.034013605442176874,21.314563988999907,18.485013355344115,6.25630208,367
+P04637,out_of_family,out_of_family: P04637,prefix_aware,4,393,True,0.017053206002728513,20.048468884000158,19.652373569257193,6.25669376,367
+P04637,out_of_family,out_of_family: P04637,prefix_aware,8,393,True,0.008573388203017833,21.27402595800004,18.52023687372805,6.257480192,367
+P04637,out_of_family,out_of_family: P04637,prefix_aware,16,393,True,0.004334257975034674,20.154220574999727,19.549255131639114,6.25905152,367
