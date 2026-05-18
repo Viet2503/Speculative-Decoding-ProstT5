@@ -1,0 +1,13 @@
+uid,bucket,L,variant,bit_exact,accept_rate
+P39621,in_family,256,naive,True,0.06396063960639606
+P39621,in_family,256,prefix_aware,True,0.05790108564535585
+P01112,in_family,189,naive,True,0.015580736543909348
+P01112,in_family,189,prefix_aware,True,0.014084507042253521
+O60762,in_family,260,naive,True,0.09838274932614555
+O60762,in_family,260,prefix_aware,True,0.09838274932614555
+P04637,out_of_family,393,naive,True,0.017053206002728513
+P04637,out_of_family,393,prefix_aware,True,0.017053206002728513
+A0A6G0XC32,out_of_family,163,naive,True,0.06420233463035019
+A0A6G0XC32,out_of_family,163,prefix_aware,True,0.05938697318007663
+P01308,out_of_family,110,naive,True,0.04289544235924933
+P01308,out_of_family,110,prefix_aware,True,0.04289544235924933
