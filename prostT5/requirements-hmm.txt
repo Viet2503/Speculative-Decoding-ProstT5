@@ -1,0 +1,11 @@
+# Local-dev requirements for the HMM drafter slice.
+#
+# Use this to set up the offline HMM build (build_hmm.py) and the
+# no-GPU smoke test (hmm_drafter.py --smoke). The notebook on Colab T4
+# manages its own ProstT5 / transformers / torch deps via pip cells —
+# do NOT install those here.
+#
+# Python 3.10+ tested; original venv used 3.13.
+
+pyhmmer==0.12.0
+torch>=2.0
