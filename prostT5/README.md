@@ -74,6 +74,17 @@ Results are plugged into Theorem 3.8 to predict wall-clock speedup at draft leng
 
 ---
 
+## Speculative decoding notebooks
+
+| Notebook | Direction | Drafter |
+|----------|-----------|---------|
+| `prostT5_baseline_performance.ipynb` | 3Di → AA | enc-CNN (one-shot baseline) |
+| `prostT5_spec_dec_CNN.ipynb` | 3Di → AA | enc-CNN + spec-dec loop |
+| `prostT5_speculative_decoding_viet.ipynb` | 3Di → AA | enc-CNN + KV-cache + HMM (optional) |
+| `prostT5_spec_dec_FlexProfile.ipynb` | **AA → 3Di** | **ProtProfileMD** ([Lüth et al. 2026](https://doi.org/10.64898/2026.01.21.700698)) |
+
+`flexprofile_drafter.py` loads `finnlueth/ProtProfileMD` (LoRA + profile head) and defines `FlexProfileAssistantModel` for HF `assistant_model`. The FlexProfile notebook runs one-shot PPM predictions, greedy spec-dec with KV-cache, K sweeps, and HF assisted generation; outputs go to `flexprofile_spec_decode_results/`.
+
 ## Future TODO — Integration Phase
 
 **What remains for the drafter-integration phase (weeks 5–7):**
@@ -81,3 +92,4 @@ Results are plugged into Theorem 3.8 to predict wall-clock speedup at draft leng
 2. Compare **predicted** speedup (from α + Theorem 3.8) to **measured** speedup
 3. Address that enc-CNN is prefix-independent — measure how this affects real acceptance in a spec-decoding loop
 4. Evaluate Profile HMM drafter as an alternative (test set already designed for MSA depth diversity)
+5. FlexProfile: optional HF `assistant_model` wrapper; compare profile KL / argmax to spec-dec acceptance

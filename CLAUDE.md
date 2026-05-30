@@ -51,4 +51,4 @@ The 100-protein test set (`prostT5/test_set_100.py`) is stratified across:
 
 ## Project Roadmap
 
-Current phase: extended benchmarking with α measurement. Next phases (weeks 5-7): wire the enc-CNN as a drafter into HuggingFace's `assistant_model` API for actual speculative decoding, compare predicted vs. measured speedups at draft lengths γ ∈ {3, 5, 8, 16}, and evaluate Profile HMM as alternative drafter.
+Current phase: extended benchmarking with α measurement. Next phases (weeks 5-7): wire drafters into speculative decoding (enc-CNN for 3Di→AA; ProtProfileMD flex profiles for AA→3Di via `prostT5_spec_dec_FlexProfile.ipynb` + `flexprofile_drafter.py`), compare predicted vs. measured speedups at draft lengths γ ∈ {3, 5, 8, 16}, and evaluate Profile HMM as alternative drafter.
