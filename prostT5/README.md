@@ -1,83 +1,175 @@
-# Baseline performance test — step-by-step
+# ProstT5 Speculative Decoding — Notebook Overview
 
-## Setup
+## High-Level Summary
 
-1. **Pinned the env** to `transformers==4.46.3` + `protobuf>=3.20,<5` + `sentencepiece` (transformers 5.x has a regression that breaks `T5Tokenizer` loading from `spiece.model`, and ProstT5 ships only `spiece.model`).
-2. **Loaded the slow `T5Tokenizer`** via `T5Tokenizer.from_pretrained('Rostlab/ProstT5_fp16', do_lower_case=False, legacy=True)` — the fast variant doesn't work because ProstT5's tokenizer is BPE, not Unigram.
-3. **Google Drive caching**: HuggingFace model cache (`HF_HOME`) is redirected to Google Drive to avoid re-downloading ProstT5 (~5.64 GB) on Colab reconnects. Checkpoints also persist to Drive.
+This project benchmarks **speculative decoding** for [ProstT5](https://github.com/mheinzinger/ProstT5), a protein language model that translates between amino-acid sequences (AA) and 3Di structure tokens in both directions.
 
-## Models
+The standard decoder is autoregressive and slow — it generates one token at a time, taking O(L) sequential steps for a protein of length L. The key idea is to use a tiny **CNN head** as a fast *drafter*: it predicts all L tokens in a single parallel forward pass from the encoder hidden states. In speculative decoding, the CNN proposes a block of K tokens and the full T5 decoder verifies them in one step. If the drafter is accurate enough (high acceptance rate α), the speedup over plain autoregressive decoding can be substantial.
 
-1. **Loaded the enc–dec model** as `AutoModelForSeq2SeqLM.from_pretrained('Rostlab/ProstT5_fp16', torch_dtype=fp16)` and put it in `.eval().half()` on GPU.
-2. **Reused the same encoder** for the enc–CNN path via `encoder = model.get_encoder()` — no second copy of ProstT5 in memory.
-3. **Loaded the AA-CNN head** from `cnn_chkpnt_AA_CNN/model.pt` into a 4-tensor module that matches the checkpoint exactly: `Conv2d(1024→32, k=7) → ReLU → Dropout → Conv2d(32→20, k=7)` (234k params, 20 outputs = the 20 standard AAs in alphabetical order `ACDEFGHIKLMNPQRSTVWY`). Verified with `strict=True` load, no missing/unexpected keys.
+Two prediction directions are studied:
 
-## Test Sets
+| Direction | Input | Output | Pipelines |
+|-----------|-------|--------|-----------|
+| **Folding** | AA sequence | 3Di structure tokens | `enc_dec_folding`, `enc_cnn_folding` |
+| **Inverse folding** | 3Di structure tokens | AA sequence | `enc_dec`, `enc_cnn` |
 
-1. **Built a 100-protein test set** (see `test_set_100.py`) stratified across:
-   - **Length**: 20 proteins per bin (tiny 50-100, short 101-250, medium 251-500, long 501-1000, very long 1001-2500)
-   - **Secondary structure**: all-alpha, all-beta, alpha/beta, coil-rich/disordered
-   - **Organism**: human, model organisms, bacteria, archaea/other
-   - **MSA depth**: deep, moderate, shallow (for future Profile HMM drafter compatibility)
-   - **Other factors**: disease association, fold complexity, function, AA composition bias
-2. **Resolved each PDB URL via the AFDB API** (`/api/prediction/{uid} → pdbUrl`) instead of hard-coding `model_v4.pdb` (AFDB has moved to `model_v6`; this also future-proofs against further bumps).
-3. **Auto-installed Foldseek** for the runtime's OS (`foldseek-osx-universal` on Mac, `foldseek-linux-avx2` on Colab) into `prostT5/foldseek_bin/bin/`, made it executable.
-4. **Extracted AA + 3Di per protein** by running `foldseek createdb` + `convert2fasta` on each downloaded PDB, then cached the result as `benchmark_data/test_set_AA.fasta` and `benchmark_data/test_set_3Di.fasta`.
-5. **Defined the timing protocol** (identical for both pipelines):
-  - **greedy, deterministic decoding** (`do_sample=False, num_beams=1`) for an apples-to-apples baseline,
-    - **2 untimed warmup runs + 3 timed repeats** per protein, take the **median**,
-    - `@torch.inference_mode()` + `model.eval()`, no autograd,
-    - `torch.cuda.synchronize()` around every timed region,
-    - `torch.cuda.reset_peak_memory_stats()` per protein → clean per-protein peak vRAM.
-6. **Checkpointing**: state saved after every protein (survives Colab disconnects via Google Drive).
-
-## Benchmarks
-
-1. **Ran the enc–dec pipeline:** one `model.generate(...)` per protein, timing the entire autoregressive loop end-to-end.
-2. **Ran the enc–CNN pipeline:** one encoder forward → trim `<fold2AA>` prefix and EOS from the hidden states (`h[:, 1:-1, :]`) → push through the AA-CNN → `argmax(-1)` → string of L AA letters.
-3. **Recorded one row per `(protein, pipeline, repeat)`** with wall time, throughput (`generated_tokens / wall_s`), and peak vRAM.
-4. **Aggregated and saved results** to `raw_runs.csv`, `summary_per_protein.csv`, and `speedup.csv`.
-5. **Plotted latency / throughput / vRAM vs. protein length** on log scales, saved to `baseline_plots.png`.
-6. **Read off the headline numbers:** enc–dec sits flat at ~21 tok/s (memory-bandwidth-bound autoregressive decoding), enc–CNN runs at 2 000–4 300 tok/s, raw wall-clock speedup is **98×–207×** across L = 110–1 210, peak vRAM differs by only ~0.1–0.4 GB (the gap is the enc–dec's KV cache).
+All experiments run in **Google Colab** with a GPU, reading inputs and writing results to `MyDrive/models/` on Google Drive. The notebooks are designed to be run in order: dataset → baseline → speculative decoding.
 
 ---
 
-## Agreement & Acceptance Rate (α) Measurement
+## Notebooks
 
-### Greedy Agreement Metrics
-- **Per-residue identity**: fraction of positions where enc-dec and enc-CNN argmax outputs match
-- **Per-AA class metrics**: precision, recall, F1 for each of 20 amino acid types
-- **Confusion matrix**: 20x20 (rows = enc-dec reference, cols = CNN prediction)
-- **Positional analysis**: agreement binned by normalized position (N-term to C-term, 10 bins)
+### 1. `100_protein_dataset.ipynb` — Dataset Builder
 
-### Sampling-Based Acceptance Rate α
-Proper α computed via Leviathan's speculative-sampling rule:
+**Run this first, once.**
 
+Downloads 100 protein structures from [AlphaFoldDB](https://alphafold.ebi.ac.uk/), extracts their 3Di structure tokens using [Foldseek](https://github.com/steineggerlab/foldseek), and writes two FASTA files to Google Drive.
+
+**What it does:**
+- Downloads PDB structures for a curated list of 100 proteins (stratified by length, taxonomy, and fold class), with 10 backup proteins in case any download fails
+- Installs Foldseek from source (auto-detects Linux/macOS binary)
+- Runs Foldseek's `easy-search` to extract per-residue 3Di tokens for each structure
+- Writes `test_set_AA.fasta` (amino acid sequences) and `test_set_3Di.fasta` (3Di token sequences) to `MyDrive/models/`
+
+**Outputs on Drive:**
 ```
-α_t = Σ_v min(p_t(v), q_t(v))
+MyDrive/models/
+  test_set_AA.fasta
+  test_set_3Di.fasta
 ```
-
-Where:
-- `p_t` = enc-dec (verifier) distribution at position t, obtained via teacher-forced forward pass
-- `q_t` = enc-CNN (drafter) distribution at position t (prefix-independent, single parallel pass)
-
-Swept across 4 sampling configurations:
-1. **Greedy** (T=1.0, no filtering) — baseline
-2. **ProstT5 published** (T=1.0, top_k=3, top_p=0.85)
-3. **Conservative** (T=0.5) — sharper distributions
-4. **Exploratory** (T=1.5) — flatter distributions
-
-Results are plugged into Theorem 3.8 to predict wall-clock speedup at draft lengths γ ∈ {3, 5, 8, 16}.
-
-### Fixed Issues
-- Length mismatch bug on long proteins (enc-dec output now truncated to expected length L)
 
 ---
 
-## Future TODO — Integration Phase
+### 2. `prostT5_baseline_performance.ipynb` — Baseline Benchmark
 
-**What remains for the drafter-integration phase (weeks 5–7):**
-1. Wire the enc-CNN into HuggingFace's `assistant_model` API for actual speculative decoding
-2. Compare **predicted** speedup (from α + Theorem 3.8) to **measured** speedup
-3. Address that enc-CNN is prefix-independent — measure how this affects real acceptance in a spec-decoding loop
-4. Evaluate Profile HMM drafter as an alternative (test set already designed for MSA depth diversity)
+**Run after the dataset notebook.**
+
+Times the two non-speculative pipelines (`enc_dec` and `enc_cnn`) on all 100 proteins in both directions and produces plots and sequence recovery statistics.
+
+**Key design choices:**
+- The **encoder runs once** per protein per direction; its hidden states are cached and reused for both the decoder timing pass and the CNN timing pass — no redundant encoder computation
+- Each measurement is repeated **5 times**; the median is reported and the standard deviation is stored for error bars
+- Per-protein checkpointing to Drive so a disconnected Colab session can resume
+
+**What it benchmarks:**
+
+| Pipeline | What runs | Latency dominated by |
+|----------|-----------|----------------------|
+| `enc_dec` | Encoder + autoregressive decoder | Decoder (O(L) sequential steps) |
+| `enc_cnn` | Encoder + CNN head (1 forward pass) | Encoder |
+| `enc_dec_folding` | Same as above in folding direction | Decoder |
+| `enc_cnn_folding` | Same as above in folding direction | Encoder |
+
+**Plots produced (all saved to Drive):**
+
+- `baseline_plots.png` — all 4 pipelines combined: latency, throughput, CNN speedup for both directions
+- `inv_folding_plots.png` — inverse folding only: latency, throughput, CNN speedup (error bar suppressed for shortest protein), sequence recovery
+- `folding_plots.png` — folding only: same layout
+- `combined_speedup.png` — both CNN speedup curves side-by-side with aligned y-axes
+
+All plots use connected lines with shaded ±std bands. Axes show plain numbers (not scientific notation).
+
+**Outputs on Drive:**
+```
+MyDrive/models/
+  summary_per_protein.csv          (root copy — read by spec-dec notebooks)
+  benchmark_results/
+    summary_per_protein.csv
+    raw_runs.csv
+    sequence_recovery.csv
+    sequence_recovery_summary.txt
+    baseline_plots.png
+    inv_folding_plots.png
+    folding_plots.png
+    combined_speedup.png
+    baseline_checkpoint.pkl
+```
+
+---
+
+### 3. `prostT5_spec_dec_folding_CNN.ipynb` — Speculative Decoding: Folding (AA → 3Di)
+
+**Requires:** baseline notebook completed first (reads `summary_per_protein.csv` for enc-dec reference timings).
+
+Benchmarks HuggingFace-native speculative decoding for the **folding direction** (AA → 3Di). The CNN head is wrapped as a `PreTrainedModel` (`CNNAssistantModel`) and passed directly to `model.generate(assistant_model=...)`, which implements the block-verify loop internally.
+
+**Key concepts:**
+
+- **Speculative decoding**: the CNN drafts K tokens in one parallel pass; the T5 decoder verifies the whole block in a single forward step. If all K tokens are accepted (match the greedy decoder), the next K tokens are drafted. Otherwise, generation falls back to the first rejected token. The output is **guaranteed identical** to plain greedy decoding (verified by sanity check on 5 proteins).
+- **Acceptance rate α**: the per-position probability that the CNN drafter agrees with the T5 verifier. Higher α → more tokens accepted per step → higher speedup. Computed analytically and empirically.
+- **K sweep**: benchmarked for K ∈ {1, 2, 4, 8} to find the optimal draft length.
+
+**Sections:**
+1. Configuration & model loading (ProstT5 + folding CNN checkpoint `CNN_fromAA_to3Di.pt`)
+2. Dataset loading + hyperparameters
+3. `CNNAssistantModel` — HuggingFace-compatible wrapper around the CNN
+4. Helper functions (`run_encdec`, `run_hf_assisted`) with per-run timing and std
+5. Sanity check: HF-assisted output == plain enc-dec greedy output
+6. Full K-sweep benchmark (resume-aware, checkpointed)
+7. Acceptance rate α analysis
+8. Load results for offline analysis (works without the model)
+9. Tables: per-K summary, predicted vs measured tokens/step, sequence recovery
+10. Plots: 6-panel main figure, α vs length, per-protein speedup scatter
+
+**Outputs on Drive:**
+```
+MyDrive/models/folding_spec_dec_results/
+  folding_spec_dec_results.csv
+  folding_spec_dec_predictions.json
+  folding_alpha_results.csv
+  folding_spec_dec_checkpoint.pkl
+  folding_spec_dec_plots.png
+  folding_alpha_analysis.png
+  folding_per_protein_speedup.png
+```
+
+---
+
+### 4. `prostT5_spec_dec_invfoldingCNN.ipynb` — Speculative Decoding: Inverse Folding (3Di → AA)
+
+**Requires:** baseline notebook completed first.
+
+Same approach as the folding notebook but for the **inverse folding direction** (3Di → AA), using the `CNN_from3di_toAA.pt` checkpoint.
+
+**Differences from the folding notebook:**
+- Input tokens are 3Di (lowercase), output tokens are amino acids (uppercase)
+- Uses `<fold2AA>` prefix instead of `<AA2fold>`
+- Separate CNN checkpoint for 3Di → AA translation
+- Sequence recovery metric is compared against ground-truth AA sequences
+
+**Sections mirror the folding notebook** (configuration, dataset, `CNNAssistantModel`, helpers, sanity check, K-sweep benchmark, α analysis, load results, tables, plots).
+
+**Outputs on Drive:**
+```
+MyDrive/models/invfolding_spec_dec_results/
+  invfolding_spec_dec_results.csv
+  invfolding_spec_dec_predictions.json
+  invfolding_alpha_results.csv
+  invfolding_spec_dec_checkpoint.pkl
+  invfolding_spec_dec_plots.png
+```
+
+---
+
+## Drive Folder Structure
+
+```
+MyDrive/models/
+  test_set_AA.fasta                    ← from 100_protein_dataset.ipynb
+  test_set_3Di.fasta                   ← from 100_protein_dataset.ipynb
+  CNN_from3di_toAA.pt                  ← upload manually before running
+  CNN_fromAA_to3Di.pt                  ← upload manually before running
+  summary_per_protein.csv              ← root copy for spec-dec notebooks
+  benchmark_results/                   ← from prostT5_baseline_performance.ipynb
+  folding_spec_dec_results/            ← from prostT5_spec_dec_folding_CNN.ipynb
+  invfolding_spec_dec_results/         ← from prostT5_spec_dec_invfoldingCNN.ipynb
+```
+
+## Recommended Run Order
+
+```
+1. 100_protein_dataset.ipynb
+2. prostT5_baseline_performance.ipynb
+3. prostT5_spec_dec_folding_CNN.ipynb      (can run in parallel with step 4)
+4. prostT5_spec_dec_invfoldingCNN.ipynb
+```
