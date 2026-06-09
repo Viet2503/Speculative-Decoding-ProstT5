@@ -1,0 +1,451 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\setlist[itemize]{noitemsep, topsep=3pt}
+\setlist[enumerate]{noitemsep, topsep=3pt}
+
+\title{Folding-Direction HMM Drafter Notes}
+\author{Speculative Decoding for ProstT5}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{High-Level Idea}
+
+The notebook \texttt{prostT5\_folding\_hmm.ipynb} studies the folding direction:
+
+\begin{verbatim}
+AA sequence -> 3Di structural-token sequence
+\end{verbatim}
+
+This is different from the inverse-folding HMM setting. A standard protein Profile HMM is built from an amino-acid MSA and naturally emits amino-acid distributions:
+
+\begin{verbatim}
+Profile-HMM state -> P(AA)
+\end{verbatim}
+
+For folding, the drafter needs 3Di tokens:
+
+\begin{verbatim}
+AA input -> draft 3Di output
+\end{verbatim}
+
+The MSA gives homologous AA sequences, not aligned 3Di labels. Therefore the folding-direction ``HMM'' in this notebook is not a strict HMMER Profile HMM. It is a family-local pseudo-3Di drafter.
+
+\section{Why HMM Cannot Directly Do Folding}
+
+In inverse folding, the task is:
+
+\begin{verbatim}
+3Di input -> AA output
+\end{verbatim}
+
+This matches the emission type of a normal protein Profile HMM:
+
+\begin{verbatim}
+HMM match state -> amino-acid distribution
+\end{verbatim}
+
+In folding, the task is:
+
+\begin{verbatim}
+AA input -> 3Di output
+\end{verbatim}
+
+But a standard Profile HMM does not give:
+
+\begin{verbatim}
+HMM match state -> 3Di distribution
+\end{verbatim}
+
+The workaround is to generate pseudo-3Di labels for family homologs using ProstT5, then learn a family-conditioned 3Di drafter from those pseudo-labels.
+
+\section{Notebook Flow}
+
+\subsection{Setup And Configuration}
+
+The notebook first imports packages, checks the CUDA runtime, and defines experiment parameters.
+
+Important parameters:
+
+\begin{itemize}
+  \item \texttt{K\_VALUES}: draft lengths tested by assisted generation.
+  \item \texttt{BENCHMARK\_PROTEIN\_LIMIT}: number of proteins in the benchmark.
+  \item \texttt{RUN\_BENCHMARKS}: whether to run Part 2 timing experiments.
+  \item \texttt{FAMILY\_GENERALIZATION\_TRAIN\_SEQS}: training homolog count in Part 1.
+  \item \texttt{FAMILY\_GENERALIZATION\_HOLDOUT\_PER\_FAMILY}: held-out homolog count in Part 1.
+  \item \texttt{FAMILY\_MSA\_MAX\_SEQS}: maximum homolog rows used for the per-protein family drafter.
+\end{itemize}
+
+Key code:
+
+\begin{verbatim}
+REQUIRE_CUDA_RUNTIME = True
+if REQUIRE_CUDA_RUNTIME and device.type != "cuda":
+    raise RuntimeError("This notebook is configured for Colab GPU/CUDA.")
+
+K_VALUES = [1, 3, 5, 8]
+BENCHMARK_PROTEIN_LIMIT = 10
+FAMILY_GENERALIZATION_TRAIN_SEQS = 32
+FAMILY_GENERALIZATION_HOLDOUT_PER_FAMILY = 2
+\end{verbatim}
+
+\subsection{Tokenization Helpers}
+
+The folding prompt is:
+
+\begin{verbatim}
+<AA2fold>
+\end{verbatim}
+
+The assistant drafter predicts over the 20 3Di symbols, but HuggingFace generation expects logits over the full ProstT5 vocabulary. The bridge is:
+
+\begin{verbatim}
+THREEDI_TOKEN_IDS = [
+    tokenizer.encode(f" {tok}", add_special_tokens=False)[0]
+    for tok in THREEDI_ALPHABET
+]
+\end{verbatim}
+
+This maps:
+
+\begin{verbatim}
+3Di symbol -> ProstT5 vocabulary ID
+\end{verbatim}
+
+\section{Part 1: Mini Family Test}
+
+Part 1 asks whether the family pseudo-HMM learns family-specific signal. It is not a speed benchmark and does not use HuggingFace assisted generation.
+
+\subsection{Drafter Used In Part 1}
+
+Part 1 uses:
+
+\begin{verbatim}
+FamilyAA3DiHMM
+\end{verbatim}
+
+This is a lightweight length-general HMM-like model over pseudo-3Di states. It learns:
+
+\begin{itemize}
+  \item start probabilities,
+  \item transition probabilities between 3Di states,
+  \item AA emissions from pseudo-3Di states.
+\end{itemize}
+
+It is used only for the in-family versus out-family sanity check.
+
+\subsection{Family Selection}
+
+The two seed families are:
+
+\begin{verbatim}
+FAMILY_GENERALIZATION_SEED_IDS = ["P01542", "P0A7N4"]
+\end{verbatim}
+
+Each family contributes:
+
+\begin{itemize}
+  \item 32 training homologs by default,
+  \item 2 held-out homologs by default.
+\end{itemize}
+
+\subsection{Candidate Homolog Selection}
+
+The code skips the query row and exact duplicate sequences:
+
+\begin{verbatim}
+records = _parse_a3m_records(a3m) if a3m else []
+rows = []
+seen = {aa_seq.upper()}
+
+for name, raw_aln in records[1:]:
+    aa = _ungap_aa(_strip_a3m_insertions(raw_aln))
+    if len(aa) < FAMILY_MSA_MIN_SEQ_LEN or aa in seen:
+        continue
+    seen.add(aa)
+    rows.append({"member_id": name, "aa": aa})
+\end{verbatim}
+
+This avoids using the seed/query sequence itself as a held-out or training homolog.
+
+\subsection{Train And Held-Out Split}
+
+The selected examples are split as:
+
+\begin{verbatim}
+needed = train_n + holdout_n
+selected = candidates[:needed]
+examples = _load_or_fold_family_examples(seed_uid, selected)
+
+holdouts = examples[:holdout_n]
+train = examples[holdout_n:holdout_n + train_n]
+\end{verbatim}
+
+With the default settings:
+
+\begin{verbatim}
+examples[0:2]  -> held-out test homologs
+examples[2:34] -> training homologs
+\end{verbatim}
+
+\subsection{Pseudo-3Di Labeling}
+
+If a pseudo-label is not cached, the notebook folds the homolog with ProstT5:
+
+\begin{verbatim}
+if aa not in by_aa:
+    di = generate_folding_reference(aa)
+    by_aa[aa] = {
+        "member_id": row["member_id"],
+        "aa": aa,
+        "3di": di,
+    }
+\end{verbatim}
+
+Conceptually:
+
+\begin{verbatim}
+homolog AA -> ProstT5 -> pseudo-3Di
+\end{verbatim}
+
+\subsection{Part 1 Metrics}
+
+Each held-out homolog is evaluated against both family models:
+
+\begin{verbatim}
+relation = "in_family" if test_family == model_family else "out_family"
+\end{verbatim}
+
+The metrics are:
+
+\begin{itemize}
+  \item \texttt{heldout\_index}: local index of the held-out homolog.
+  \item \texttt{heldout\_member\_id}: MSA header/name of the held-out homolog.
+  \item \texttt{token\_acc}: fraction of positions where argmax 3Di matches the pseudo-label.
+  \item \texttt{mean\_ref\_logp}: average log probability assigned to the pseudo-label 3Di token.
+\end{itemize}
+
+Key scoring code:
+
+\begin{verbatim}
+pred_idx = logits[:L].argmax(axis=1)
+token_acc = float((pred_idx[valid] == ref_idx[valid]).mean())
+
+mean_ref_logp = float(
+    logits[np.arange(L)[valid], ref_idx[valid]].mean()
+)
+\end{verbatim}
+
+Expected meaningful result:
+
+\begin{verbatim}
+in_family score > out_family score
+\end{verbatim}
+
+\section{Part 2: Assisted-Generation Benchmark}
+
+Part 2 asks whether the folding-direction drafter speeds up ProstT5 generation while preserving the plain ProstT5 greedy output.
+
+\subsection{Static FamilyFoldingHMMDrafter}
+
+The static drafter is:
+
+\begin{verbatim}
+FamilyFoldingHMMDrafter
+\end{verbatim}
+
+It builds one family-specific position table per query protein:
+
+\begin{verbatim}
+position i -> P(3Di token)
+\end{verbatim}
+
+At generation time it returns a slice:
+
+\begin{verbatim}
+def get_draft_logits(self, pos: int, prefix=None, K: int | None = None):
+    if K is None:
+        return self.logits[pos:]
+    return self.logits[pos:pos + K]
+\end{verbatim}
+
+For example:
+
+\begin{verbatim}
+pos = 10, K = 5
+return positions 10, 11, 12, 13, 14
+\end{verbatim}
+
+It does not look back at previously generated tokens.
+
+\subsection{Prefix-Aware Folding HMM}
+
+The prefix-aware drafter adds local 3Di context:
+
+\begin{verbatim}
+family + position + last p generated 3Di tokens -> P(next 3Di)
+\end{verbatim}
+
+The new parameter is:
+
+\begin{itemize}
+  \item \texttt{p}: number of previous generated 3Di tokens used as prefix context.
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+p = 3
+prefix = [..., a, d, y]
+context = (a, d, y)
+\end{verbatim}
+
+If the context is missing in the count table, it falls back to the static distribution:
+
+\begin{verbatim}
+return self.logits[pos]
+\end{verbatim}
+
+\subsection{Assistant Model Wrappers}
+
+The static and prefix-aware drafters are wrapped as HuggingFace assistant models:
+
+\begin{verbatim}
+model.generate(..., assistant_model=hmm_assistant)
+\end{verbatim}
+
+The wrapper maps the 20 3Di logits into the full ProstT5 vocabulary:
+
+\begin{verbatim}
+logits[0, pos, THREEDI_TOKEN_IDS] = row
+\end{verbatim}
+
+\subsection{Part 2 Metrics}
+
+The benchmark records:
+
+\begin{itemize}
+  \item \texttt{wall\_s}: runtime in seconds.
+  \item \texttt{speedup}: plain ProstT5 runtime divided by assisted runtime.
+  \item \texttt{peak\_vram\_gb}: peak GPU memory.
+  \item \texttt{exact\_match}: whether assisted output equals plain ProstT5 greedy output.
+  \item \texttt{family\_projected}: number of usable projected homolog pseudo-label rows.
+\end{itemize}
+
+\section{Part 1 Versus Part 2}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Part & Question & Main model \\
+\midrule
+Part 1 & Is the family drafter meaningful? & \texttt{FamilyAA3DiHMM} \\
+Part 2 & Does it speed up ProstT5 correctly? & Assistant HMM drafters \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Short version:
+
+\begin{verbatim}
+Part 1 = drafter sanity check
+Part 2 = actual assisted-generation benchmark
+\end{verbatim}
+
+\section{Current Run Result Explanation}
+
+The current run produced result lines such as:
+
+\begin{verbatim}
+prefix_exact=8/20, median_speedup=1.16x, family_projected=16
+\end{verbatim}
+
+This line is from the prefix-aware Part 2 benchmark for one protein. It summarizes all prefix-aware settings tested for that protein.
+
+\subsection{What The Numbers Mean}
+
+\begin{itemize}
+  \item \texttt{family\_projected=16}: the drafter successfully used 16 homolog pseudo-3Di rows from the query protein's MSA family. This is a construction-quality signal. If this number is low, the family drafter has little data.
+  \item \texttt{median\_speedup=1.16x}: across the prefix-aware configurations for this protein, the median assisted-generation runtime was 1.16 times faster than plain ProstT5 greedy folding. This is a modest positive speedup.
+  \item \texttt{prefix\_exact=8/20}: only 8 out of 20 prefix-aware assisted-generation configurations produced exactly the same 3Di sequence as plain ProstT5 greedy folding.
+\end{itemize}
+
+The 20 configurations come from:
+
+\begin{verbatim}
+P_VALUES = [1, 2, 3, 4, 5]
+K_VALUES = [1, 3, 5, 8]
+5 * 4 = 20
+\end{verbatim}
+
+\subsection{What Is Positive}
+
+The positive part is that the folding-direction pseudo-HMM can be built from family data and can sometimes speed up generation. The \texttt{family\_projected=16} value means the MSA-to-pseudo-3Di projection pipeline worked for 16 homolog rows. The \texttt{median\_speedup=1.16x} value means the assistant path was faster than the plain verifier for the median tested setting.
+
+This supports the claim that the family-local pseudo-3Di drafter is meaningful enough to test as a folding-direction drafter.
+
+\subsection{What Is Concerning}
+
+The concerning part is \texttt{prefix\_exact=8/20}. In strict greedy speculative decoding, the drafter is allowed to propose wrong tokens, but the verifier should reject wrong tokens and force the final sequence to match the plain ProstT5 greedy output.
+
+Therefore:
+
+\begin{verbatim}
+Drafter can be wrong: acceptable.
+Final assisted output differs from verifier: correctness issue.
+\end{verbatim}
+
+Only 8 exact configurations out of 20 means that the current folding assistant setup is not yet correctness-clean. The likely causes are assistant-logit alignment, token-position alignment, HuggingFace assistant-model behavior, or generation configuration details.
+
+\subsection{How To Report The Current Result}
+
+A careful report should say:
+
+\begin{quote}
+The current folding-direction pseudo-HMM drafter can be constructed from MSA-family pseudo-labels and shows modest speedup in some settings. For example, one prefix-aware run reports \texttt{family\_projected=16} and \texttt{median\_speedup=1.16x}. However, exact agreement with plain ProstT5 greedy generation was only \texttt{8/20} across prefix length and draft length settings, so the current assisted-generation path should be treated as preliminary rather than a fully correct speculative-decoding implementation.
+\end{quote}
+
+\subsection{Interpretation For The Slides}
+
+The slide-level conclusion is:
+
+\begin{itemize}
+  \item The drafter construction works: family homologs can be pseudo-labeled and projected.
+  \item The speedup signal exists but is small so far.
+  \item The exactness issue is the main blocker.
+  \item The result is useful as a preliminary folding-direction drafter experiment, not yet as a final speculative-decoding result.
+\end{itemize}
+
+\section{Outputs}
+
+Part 1 saves:
+
+\begin{verbatim}
+prostT5/results/folding_hmm_results/family_generalization/family_cross_test.csv
+\end{verbatim}
+
+Part 2 saves:
+
+\begin{verbatim}
+prostT5/results/folding_hmm_results/folding_hmm_results.csv
+prostT5/results/folding_hmm_results/folding_prefix_hmm_results.csv
+prostT5/results/folding_hmm_results/folding_hmm_plots.png
+\end{verbatim}
+
+\end{document}
