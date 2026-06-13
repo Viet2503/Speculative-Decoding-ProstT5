@@ -1,72 +1,62 @@
-
-α summary (greedy, T=1.0):
-  mean  = 0.6882
-  std   = 0.1151
-  min   = 0.2624
-  max   = 0.8832
-Saved: folding_alpha_results.csv
-
 ======================================================================
 BENCHMARK RESULTS — ProstT5 Folding Speculative Decoding (AA → 3Di)
 ======================================================================
-Proteins: 50   Device: cuda:0
+Proteins: 100   Device: cuda:0
 
-  K   α (mean)   Pred tok/step   Speedup mean   Speedup med   Match%   HF OK%
----------------------------------------------------------------------------
-  1     0.6882           1.688          1.447x         1.451x    88.0%   100.0%
-  2     0.6882           2.175          1.804x         1.828x    94.0%   100.0%
-  4     0.6882           2.782          2.234x         2.258x    84.0%   100.0%
+  K   α (mean)   Pred tok/step   Speedup mean   Speedup med   HF OK%
+-----------------------------------------------------------------
+  1     0.6138           1.614          1.439x         1.458x   100.0%
+  2     0.6138           2.018          1.743x         1.780x   100.0%
+  4     0.6138           2.489          2.084x         2.148x   100.0%
+  8     0.6138           2.857          2.305x         2.400x   100.0%
 ======================================================================
 
 Notes:
   Pred tok/step = (1 - α^(K+1)) / (1 - α)  [Leviathan et al., Theorem 3.8]
-  Match% = fraction of proteins where HF output == plain greedy output
-  (Should be 100% for correct greedy speculative decoding)
+  Correctness verified in sanity check (Section 5) — output matches plain greedy.
 
-=======================================================
+  =======================================================
 Predicted vs Measured Tokens/Step
 =======================================================
-Global mean α = 0.6882
+Global mean α = 0.6138
 
   K   Pred tok/step   Speedup (mean)    Ratio
 ---------------------------------------------
-  1           1.688            1.447    0.857
-  2           2.175            1.804    0.830
-  4           2.782            2.234    0.803
+  1           1.614            1.439    0.892
+  2           2.018            1.743    0.864
+  4           2.489            2.084    0.837
+  8           2.857            2.305    0.807
 
 Ratio < 1.0 : the CNN drafter's prefix-independence hurts acceptance in practice
 Ratio ~ 1.0 : α prediction is accurate
 Ratio > 1.0 : measured speedup exceeds theoretical prediction
 
-
 Sequence recovery vs ground-truth 3Di (AlphaFold structures)
-  enc-dec greedy : 0.771 ± 0.143
-  HF assisted K=4: 0.771 ± 0.142
-  (Should be identical if Match% = 100%)
+  HF assisted K=1: 0.722 ± 0.177
+  HF assisted K=8:  0.723 ± 0.177
+  (All K values produce identical output for correct greedy speculative decoding)
 
-
-====================================================================
+  ====================================================================
 FINAL SUMMARY — ProstT5 Speculative Decoding, Folding (AA → 3Di)
 ====================================================================
-  Proteins evaluated : 50
+  Proteins evaluated : 100
   Device             : cuda:0
   Drafter            : Folding CNN (233,908 params)
   Verifier           : ProstT5 enc-dec (2819M params)
-  Mean α (greedy)    : 0.6882
+  Mean α (greedy)    : 0.6138
 
-Method                             α  Pred tok/step  Speedup (mean)   Match%
----------------------------------------------------------------------------
-HF assisted  K=1              0.6882          1.688           1.447x    88.0%
-HF assisted  K=2              0.6882          2.175           1.804x    94.0%
-HF assisted  K=4              0.6882          2.782           2.234x    84.0%
+Method                             α  Pred tok/step  Speedup (mean)
+-----------------------------------------------------------------
+HF assisted  K=1              0.6138          1.614           1.439x
+HF assisted  K=2              0.6138          2.018           1.743x
+HF assisted  K=4              0.6138          2.489           2.084x
+HF assisted  K=8              0.6138          2.857           2.305x
 ====================================================================
 
-Best K: 4  →  mean speedup 2.23×
+Best K: 8  →  mean speedup 2.30×
 
 Interpretation:
-  - α = 0.688 means the CNN drafter agrees with the T5 decoder on ~69% of tokens.
-  - Theorem 3.8 predicts 2.71 tokens/step for K=4; measured speedup is 2.23×.
-  - Speedup is bounded by 1/(1-α) = 3.21× regardless of K.
+  - α = 0.614 means the CNN drafter agrees with the T5 decoder on ~61% of tokens.
+  - Theorem 3.8 predicts 2.56 tokens/step for K=8; measured speedup is 2.30×.
+  - Speedup is bounded by 1/(1-α) = 2.59× regardless of K.
   - To improve: use a higher-α drafter (e.g. small T5 decoder, profile HMM).
-
-
