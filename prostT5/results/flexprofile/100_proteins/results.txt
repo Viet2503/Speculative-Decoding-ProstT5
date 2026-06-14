@@ -1,0 +1,12 @@
+======================================================================
+BENCHMARK RESULTS — ProstT5 Folding Speculative Decoding (AA → 3Di)
+======================================================================
+Proteins: 100   Device: cuda:0
+
+=== Speedup by K (flexprofile drafter) ===
+      K  Speedup mean    Speedup med  Draft accept  Pred tok/step
+-------------------------------------------------------
+      1          0.97      0.99         3.8%      1.04
+      2          0.97      0.99         2.1%      1.04
+      4          0.97      0.99         1.1%      1.04
+      8          0.96      0.98         0.5%      1.04
