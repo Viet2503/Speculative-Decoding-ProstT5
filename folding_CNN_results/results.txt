@@ -60,3 +60,28 @@ Interpretation:
   - Theorem 3.8 predicts 2.56 tokens/step for K=8; measured speedup is 2.30×.
   - Speedup is bounded by 1/(1-α) = 2.59× regardless of K.
   - To improve: use a higher-α drafter (e.g. small T5 decoder, profile HMM).
+
+
+  ======================================================================
+BENCHMARK RESULTS — ProstT5 Folding Speculative Decoding (AA → 3Di)
+======================================================================
+Proteins: 100   Device: cuda:0   K_DISPLAY=[1, 2, 4, 6, 7, 8, 9, 10, 12, 16, 20]
+
+  K   α (mean)   Pred tok/step   Speedup mean   Speedup med   HF OK%
+-----------------------------------------------------------------
+  1     0.6138           1.614          1.439x         1.458x   100.0%
+  2     0.6138           2.018          1.743x         1.780x   100.0%
+  4     0.6138           2.489          2.084x         2.148x   100.0%
+  6     0.6138           2.729          2.146x         2.215x   100.0%
+  7     0.6138           2.802          2.195x         2.255x   100.0%
+  8     0.6138           2.857          2.305x         2.400x   100.0%
+  9     0.6138           2.898          2.249x         2.298x   100.0%
+ 10     0.6138           2.929          2.308x         2.363x   100.0%
+ 12     0.6138           2.971          2.328x         2.381x   100.0%
+ 16     0.6138           3.013          2.283x         2.343x   100.0%
+ 20     0.6138           3.030          2.319x         2.325x   100.0%
+======================================================================
+
+Notes:
+  Pred tok/step = (1 - α^(K+1)) / (1 - α)  [Leviathan et al., Theorem 3.8]
+  Correctness verified in sanity check (Section 5) — output matches plain greedy.
