@@ -166,3 +166,8 @@ archive/
 logs/
 
 .python-version
+# teammate folding-MSA data (large; regenerable / re-downloadable). Sweep outputs
+# under prostT5/folding_profile_sweep_results/ ARE committed.
+folding_MSA/
+folding_MSA-*.zip
+/refs_3di.json
