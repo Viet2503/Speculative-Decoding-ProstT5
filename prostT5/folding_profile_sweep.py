@@ -112,6 +112,25 @@ class FoldingProfileDrafter:
 
         self.static_counts = counts
         self.static_argmax = counts.argmax(axis=1)   # (L,)
+        # drafter "confidence" = top-1 probability of the column distribution.
+        # This is what HF's assistant_confidence_threshold compares against.
+        self.static_conf = (counts.max(axis=1) / counts.sum(axis=1))  # (L,)
+
+    def pred_conf_for_prefix(self, prefix_syms: list, max_p: int) -> tuple[int, float]:
+        """(argmax class, top-1 prob) at position len(prefix), conditioned on up
+        to max_p preceding reference symbols (with backoff). The probability is
+        the drafter's confidence used by the dynamic-K policy."""
+        pos = len(prefix_syms)
+        if pos >= self.L:
+            return -1, 0.0
+        available = min(max_p, pos)
+        for ctx_len in range(available, -1, -1):
+            ctx = tuple(prefix_syms[-ctx_len:]) if ctx_len > 0 else tuple()
+            key = (pos, ctx)
+            if key in self.context_counts:
+                c = self.context_counts[key] + self.smoothing
+                return int(c.argmax()), float(c.max() / c.sum())
+        return int(self.static_argmax[pos]), float(self.static_conf[pos])
 
     def argmax_for_prefix(self, prefix_syms: list, max_p: int) -> int:
         """argmax 3Di class at position len(prefix), conditioned on up to max_p
