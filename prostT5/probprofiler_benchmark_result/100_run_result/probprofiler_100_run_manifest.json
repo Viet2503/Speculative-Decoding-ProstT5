@@ -1,0 +1,41 @@
+{
+  "generated_at_utc": "2026-07-04T11:35:15.807999+00:00",
+  "source_root": "prostT5/probprofiler_benchmark_result/folding_spec_dec_results",
+  "output_csv": "prostT5/probprofiler_benchmark_result/100_run_result/probprofiler_100_run_unified.csv",
+  "rows": 786,
+  "unique_proteins": 64,
+  "drafters": [
+    "PA",
+    "PU"
+  ],
+  "k_values": [
+    -1,
+    1,
+    4,
+    8,
+    12
+  ],
+  "hf_ok_counts": {
+    "True": 786
+  },
+  "rows_by_drafter": {
+    "PA": 391,
+    "PU": 395
+  },
+  "rows_by_drafter_and_k": {
+    "PA|K=-1": 3,
+    "PA|K=1": 97,
+    "PA|K=4": 97,
+    "PA|K=8": 97,
+    "PA|K=12": 97,
+    "PU|K=-1": 3,
+    "PU|K=1": 98,
+    "PU|K=4": 98,
+    "PU|K=8": 98,
+    "PU|K=12": 98
+  },
+  "duplicate_key_count_without_replicate_index": 268,
+  "duplicate_key_count_with_replicate_index": 0,
+  "note": "Repeated timing rows are preserved as replicate_index because summary CSV duplicates have differing metrics, not exact duplicate rows.",
+  "intended_drive_folder": "/content/drive/MyDrive/Speculative-Decoding-ProstT5/prostT5/probprofiler_benchmark_result/100_run_result"
+}
