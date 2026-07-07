@@ -169,3 +169,4 @@ logs/
 
 # Local/generated ProstT5 benchmark caches
 prostT5/folding_MSA-2/
+/Viet/
