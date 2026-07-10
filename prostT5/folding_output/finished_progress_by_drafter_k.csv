@@ -1,0 +1,17 @@
+drafter,K,successful_proteins,rows
+PA,1,97,101
+PA,4,97,102
+PA,8,97,100
+PA,12,97,100
+PU,1,97,101
+PU,4,97,102
+PU,8,97,101
+PU,12,97,103
+cnn,1,100,105
+cnn,4,100,106
+cnn,8,100,104
+cnn,12,100,106
+flexprofile,1,100,107
+flexprofile,4,100,104
+flexprofile,8,100,104
+flexprofile,12,100,104
